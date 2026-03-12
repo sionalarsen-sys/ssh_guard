@@ -1,15 +1,12 @@
 {
     "name": "Linux Script Settings",
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-
     "features": {
-        // This enables "Docker-in-Docker", essential for building containers in Codespaces
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "version": "latest",
             "moby": true
         }
     },
-
     "customizations": {
         "vscode": {
             "settings": {
@@ -24,11 +21,12 @@
             ]
         }
     },
-
-    // 80: Apache, 8080: Alternate/Dev, 3306: MariaDB
     "forwardPorts": [80, 8080, 3306],
-
-    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y git vim tree htop net-tools dnsutils build-essential && chmod +x ./bin/repo.sh",
-
-    "postAttachCommand": "git pull --all && ./.devcontainer/setup-env.sh && ./bin/repo.sh"
+    "portsAttributes": {
+        "80": { "label": "Apache (HTTP)" },
+        "8080": { "label": "Dev Server" },
+        "3306": { "label": "MariaDB (MySQL)" }
+    },
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y git vim tree htop net-tools dnsutils build-essential bc && chmod +x ./.devcontainer/setup-env.sh",
+    "postAttachCommand": "git pull && /bin/bash ./.devcontainer/setup-env.sh && . ./bin/repo.sh"
 }
