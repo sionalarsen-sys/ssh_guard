@@ -3,7 +3,7 @@ A repo on which to build scripting projects
 
 Linux Mastery: Scripting & Automation Template
 
-North Seattle College | IT135 & IBEST Programming
+North Seattle College | IT135 Intro to Linux
 Overview
 
 This repository is a professional-grade development environment for Linux Bash scripting. It is designed to transition students from basic command execution to building modular, documented, and industrial-strength tools.
