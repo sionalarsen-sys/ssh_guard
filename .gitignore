@@ -35,3 +35,17 @@ temp/
 [._]s[a-rt-v][a-z]
 [._]ss[a-gi-z]
 [._]sw[a-p]
+
+# Ignore the local configuration
+ssh_guard.conf
+
+# Ignore all text and log files in the main and resource folders
+*.txt
+*.log
+*.bak
+resources/
+
+# Don't ignore scripts and sample logs
+!ssh_guard.sh
+!log_gen.sh
+!auth_log_sample.txt
