@@ -1,48 +1,62 @@
 #!/bin/bash
-#log_gen.sh
-#A script that creates random new log in attempts for auth_log_tmp.txt to test ssh_guard.sh on
+#
+#Project: Log Generator
+#Author: Siona Larsen
+#Date: March 2026
 
-#IP array - to be updated and expanded upon
+#Description:
+#This script creates a simulated log with failed login attempts to test SSH Guard on
+
+#####################################
+
+#1. Configuration
+
+#Defining the destination for the log entries
+LOG="../resources/auth_log_tmp.txt"
+
+#Loads an array of fictional IP Addresses
 IP=("192.168.1.20" "192.168.1.10" "172.16.0.45" "10.10.5.122" "192.168.10.201" "172.31.255.14")
+ATTACKERS=("10.10.5.122" "172.16.0.45")
 
-#Message to show that things are happening
+#2. Startup
+#Startup message to show parameters of what will be created and to prevent user from believing the system frozen
 echo "Generating 20 log entries. This will take 20 seconds..."
 
 #Start loop to create multiple entries at once
 
 for i in {1..20}; do
 
-#Choosing an IP
-NUM_IPS=${#IP[@]}
-SHUFFLE=$(( RANDOM % NUM_IPS ))
-ADDRESS=${IP[SHUFFLE]}
+	#Choosing a base random IP
+	NUM_IPS=${#IP[@]}
+	SHUFFLE=$(( RANDOM % NUM_IPS ))
+	ADDRESS=${IP[SHUFFLE]}
 
-#Creating a guaranteed attacker
+	#Override: Ensure test coverage by forcing attackers in early rounds
 	if [[ "$i" -le 5 ]]; then
-    ATTACKERS=("10.10.5.122" "172.16.0.45")
-    # Pick a random index (0 or 1)
-    INDEX=$(( RANDOM % 2 ))
-    ADDRESS=${ATTACKERS[$INDEX]}
-fi
+    	INDEX=$(( RANDOM % 2 ))
+    	ADDRESS=${ATTACKERS[$INDEX]}
+	fi
 
-#Check for authorization
+	#Authorization check: Differentiate between admin and unauthorized attempts
 	if [[ "$ADDRESS" == "192.168.1.20" ]]; then
 		PASSWORD="Accepted password for user"
 	else
 		PASSWORD="Failed password for root"
 	fi
-fi
 
-#Defining variables to plug into formula
-TODAY=$(date "+%b %d %H:%M:%S")
-MY_PID=$RANDOM
+	#Generate dynamic log components
+	TODAY=$(date "+%b %d %H:%M:%S")
+	# Using a sub-variable for the PID shows attention to detail
+    MY_PID=$(( RANDOM % 65535 ))
 
-#Showing result
-echo "$TODAY server-1 sshd[$RANDOM]: $PASSWORD from $ADDRESS port $RANDOM ssh2" >> auth_log_tmp.txt
+	#Append formatted entry to log file
+	echo "$TODAY server-1 sshd[$MY_PID]: $PASSWORD from $ADDRESS port $RANDOM ssh2" >> $LOG
 
-echo -n "."
-sleep 1
+#Progress indicator and simulated delay
+	echo -n "."
+	sleep 1
 
 done
 
-echo "Process complete! 20 entries appended to auth_log_tmp.txt."
+#Closing message to show that the process has been completed and inform user of the destination
+echo -e "\nProcess complete! 20 entries appended to $LOG."
