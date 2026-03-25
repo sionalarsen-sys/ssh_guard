@@ -1,75 +1,110 @@
 #!/bin/bash
-#ssh_guard.sh
-#A script to review a log of log in attempts for failures, move them to an audit txt file to sort and count failures by IP addresses, and block IP addresses that fail more than [x] times as a potential security risk
+# Project: SSH Guard - Brute Force Mitigation Tool
+# Author:  Siona Larsen
+# Date:    March 2026
+#
+# Description:
+# This script monitors system authentication logs for failed login attempts.
+# If an IP exceeds a defined threshold, it is dynamically added to an 
+# nftables/iptables blocklist to prevent further attacks.
+#######################################
 
-#Startup- probably add an echo line. check for the conf file and if its there, use it to load in the variables. If not, prompt user to define the variables and save it to a conf file (will want an echo that the file has been created), then load it.
-CONFIG="ssh_guard.conf"
+#1. Global Functions
 
-run_setup() {
-echo "---Setup---"
-
-read -p "Enter the directory/file name that needs to be filtered for failures: " BLOCK1
-
-read -p "Enter the directory/file to append all failures to: " BLOCK2
-
-read -p "Enter the threshold number of failures before the IP should be blocked: " BLOCK3
-
-read -p "Enter the directory/file name of protected IPs that should never be blocked: " BLOCK4
-
-read -p "Enter the directory/file name where blocked IPs should be saved: " BLOCK5
-
-cat << EOF > "$CONFIG"
-LOG="$BLOCK1"
-FAIL="$BLOCK2"
-THRESHOLD="$BLOCK3"
-WHITELIST="$BLOCK4"
-AUDIT="$BLOCK5"
-EOF
-    echo "Configuration saved to $CONFIG."
-    source "$CONFIG"
+# Function: Centralized logging for both terminal (if verbose) and audit log
+log_msg() {
+    local TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    # 1. Always append to the audit log for accountability
+    if [[ -n "$AUDIT" ]]; then
+        echo "[$TIMESTAMP] $1" >> "$AUDIT"
+    fi
+    # 2. Only print to screen if VERBOSE is 'y' or unset (default to talking)
+    if [[ "$VERBOSE" != [Nn]* ]]; then
+        echo "$1"
+    fi
 }
 
+# Function: Critical errors that always print to screen and log
+log_error() {
+    local TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "ERROR: $1" >&2
+    if [[ -n "$AUDIT" ]]; then
+        echo "[$TIMESTAMP] ERROR: $1" >> "$AUDIT"
+    fi
+}
+
+# Allows for users to customize the configuration file to match the file types they use
+run_setup() {
+	echo "---Setup---"
+	read -p "Log to monitor: " INPUT_LOG
+	read -p "Fail log destination: " INPUT_FAIL
+	read -p "Threshold of failures: " INPUT_THRESHOLD
+	read -p "Whitelisted IP file: " INPUT_WHITELIST
+	read -p "Blocked IPs destination: " INPUT_AUDIT
+	read -p "Enable detailed terminal output? (y/n): " INPUT_VERBOSE
+
+cat << EOF > "$CONFIG"
+LOG="$INPUT_LOG"
+FAIL="$INPUT_FAIL"
+THRESHOLD="$INPUT_THRESHOLD"
+WHITELIST="$INPUT_WHITELIST"
+AUDIT="$INPUT_AUDIT"
+VERBOSE="$INPUT_VERBOSE"
+EOF
+	    echo "Configuration saved to $CONFIG."
+	    source "$CONFIG"
+}
+
+#2. Configuration & Environment
+CONFIG="../ssh_guard.conf"
+
 if [[ -f "$CONFIG" ]]; then
-	echo "Loading settings..."
+	#The file exists and is loaded
 	source "$CONFIG"
 else
+	#The file is missing and runs setup function
 	echo "No configuration found. Starting first-time setup..."
 	run_setup
 
 fi
 
-#Update - now that there is a conf file, prompt the user if they would like to review their variables (print them on screen if yes) and then if they would like to update them. Go back to startup if yes, else move on
-read -p "Would you like to review or update settings? (y/n): " UPDATE
+#3. Interactive Update Option
+#To allow for automation, update response timesout after 5 seconds
+read -t 5 -p "Would you like to review or update settings? (y/n): " UPDATE || UPDATE="n"
 if [[ "$UPDATE" == [Yy]* ]]; then
-    echo "Current Settings: LOG=$LOG, THRESHOLD=$THRESHOLD"
+    echo "Current Settings: LOG=$LOG, THRESHOLD=$THRESHOLD, VERBOSE=$VERBOSE"
     read -p "Update these now? (y/n): " CONFIRM
     if [[ "$CONFIRM" == [Yy]* ]]; then
         run_setup
     fi
 fi
 
-echo "---Beginning SSH Guard---"
+#4. Main Execution
+log_msg "---Beginning SSH Guard Scan---"
 
-#Checks the log file for any mention of failure and appends to a txt file
-grep -iE "failed|invalid" "auth_log_tmp.txt" >> master_fail_log.txt
+# Verify files exist before running to prevent grep/awk crashes
+if [[ ! -f "$LOG" ]]; then
+    log_error "Source log not found at $LOG. Check your config."
+    exit 1
+fi
 
-#Checks the failure txt file for the IP only and gets a count of the number of failed log ins by the IP address
-awk '{print $11}' master_fail_log.txt | sort | uniq -c | while read COUNT IP; do
+#Step 1: Filter log for failures
+grep -iE "failed|invalid" "$LOG" >> $FAIL
 
-#Begins a loop to determine if each unique IP address has a number of failures that suggest a security risk, compares against a whitelist txt of owner IP that should never be blocked, checks if the IP has already been blocked in the past, puts the IP into a block script and logs it in an Audit file
-# GATE 1: Is it above the threshold?
+#Step 2: Analyze failures and act
+awk '{print $11}' $FAIL | sort | uniq -c | while read COUNT IP; do
     if [[ "$COUNT" -ge "$THRESHOLD" ]]; then
 
-        # GATES 2 & 3: Is it NOT whitelisted AND NOT already blocked?
-        # ! means "NOT"
-        # -q means "Quiet" (just check, don't print)
-        
-        if ! grep -q "$IP" "$WHITELIST" && ! grep -q "$IP" "$AUDIT"; then
-            echo "ACTION: Blocking $IP ($COUNT failures)"
-            # [Your nft command]
-            # [Your echo to audit log]
-        else
-            echo "NOTICE: $IP skipped (Whitelisted or already blocked)"
+	# Security logic: Check Whitelist and Audit (already blocked)
+    if grep -q "$IP" "$WHITELIST" 2>/dev/null; then
+        log_msg "NOTICE: $IP is whitelisted. Skipping."
+    elif grep -q "$IP" "$AUDIT" 2>/dev/null; then
+        continue 
+    else
+        log_msg "ACTION: Blocking $IP ($COUNT failures detected)"
+        # Future home of: nft add element inet filter blackhole { $IP }
         fi
     fi
 done
+
+log_msg "--- Scan Complete ---"
