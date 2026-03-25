@@ -1,0 +1,9 @@
+# SSH Guard Configuration Settings
+# Created: 2026-03-25
+
+LOG="../resources/auth_log_tmp.txt"
+FAIL="../resources/master_fail_log.txt"
+THRESHOLD="5"
+WHITELIST="../resources/whitelist.txt"
+AUDIT="../resources/audit_log.txt"
+VERBOSE="y"
