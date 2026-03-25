@@ -1,0 +1,75 @@
+#!/bin/bash
+#ssh_guard.sh
+#A script to review a log of log in attempts for failures, move them to an audit txt file to sort and count failures by IP addresses, and block IP addresses that fail more than [x] times as a potential security risk
+
+#Startup- probably add an echo line. check for the conf file and if its there, use it to load in the variables. If not, prompt user to define the variables and save it to a conf file (will want an echo that the file has been created), then load it.
+CONFIG="ssh_guard.conf"
+
+run_setup() {
+echo "---Setup---"
+
+read -p "Enter the directory/file name that needs to be filtered for failures: " BLOCK1
+
+read -p "Enter the directory/file to append all failures to: " BLOCK2
+
+read -p "Enter the threshold number of failures before the IP should be blocked: " BLOCK3
+
+read -p "Enter the directory/file name of protected IPs that should never be blocked: " BLOCK4
+
+read -p "Enter the directory/file name where blocked IPs should be saved: " BLOCK5
+
+cat << EOF > "$CONFIG"
+LOG="$BLOCK1"
+FAIL="$BLOCK2"
+THRESHOLD="$BLOCK3"
+WHITELIST="$BLOCK4"
+AUDIT="$BLOCK5"
+EOF
+    echo "Configuration saved to $CONFIG."
+    source "$CONFIG"
+}
+
+if [[ -f "$CONFIG" ]]; then
+	echo "Loading settings..."
+	source "$CONFIG"
+else
+	echo "No configuration found. Starting first-time setup..."
+	run_setup
+
+fi
+
+#Update - now that there is a conf file, prompt the user if they would like to review their variables (print them on screen if yes) and then if they would like to update them. Go back to startup if yes, else move on
+read -p "Would you like to review or update settings? (y/n): " UPDATE
+if [[ "$UPDATE" == [Yy]* ]]; then
+    echo "Current Settings: LOG=$LOG, THRESHOLD=$THRESHOLD"
+    read -p "Update these now? (y/n): " CONFIRM
+    if [[ "$CONFIRM" == [Yy]* ]]; then
+        run_setup
+    fi
+fi
+
+echo "---Beginning SSH Guard---"
+
+#Checks the log file for any mention of failure and appends to a txt file
+grep -iE "failed|invalid" "auth_log_tmp.txt" >> master_fail_log.txt
+
+#Checks the failure txt file for the IP only and gets a count of the number of failed log ins by the IP address
+awk '{print $11}' master_fail_log.txt | sort | uniq -c | while read COUNT IP; do
+
+#Begins a loop to determine if each unique IP address has a number of failures that suggest a security risk, compares against a whitelist txt of owner IP that should never be blocked, checks if the IP has already been blocked in the past, puts the IP into a block script and logs it in an Audit file
+# GATE 1: Is it above the threshold?
+    if [[ "$COUNT" -ge "$THRESHOLD" ]]; then
+
+        # GATES 2 & 3: Is it NOT whitelisted AND NOT already blocked?
+        # ! means "NOT"
+        # -q means "Quiet" (just check, don't print)
+        
+        if ! grep -q "$IP" "$WHITELIST" && ! grep -q "$IP" "$AUDIT"; then
+            echo "ACTION: Blocking $IP ($COUNT failures)"
+            # [Your nft command]
+            # [Your echo to audit log]
+        else
+            echo "NOTICE: $IP skipped (Whitelisted or already blocked)"
+        fi
+    fi
+done
