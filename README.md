@@ -89,6 +89,7 @@ The resulting `audit_log.txt` provides a forensic timeline of actions taken, ens
 
 While the core analysis engine is functional, the following features are planned for future releases to improve system hygiene and performance:
 
+* **Environment Decoupling:** Separating the "Lab" testing logic from the "Production" utility to allow for seamless, plug-and-play deployment on live Linux systems.
 * **Log Rotation & Cleanup:** Implementing a "Cleanup" routine to compress or archive `master_fail_log.txt` after processing to prevent disk space exhaustion.
 * **Active Firewall Integration:** Transitioning from "Logging-only" mode to active mitigation using `nftables` or `iptables` API calls.
 * **Discord/Slack Webhooks:** Adding real-time notifications to alert administrators when a high-priority block occurs.
