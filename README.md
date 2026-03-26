@@ -14,7 +14,7 @@ This project was developed as a final portfolio piece for **IT 135 (Introduction
 
 ## 🔍 Case Study: The Problem & The Solution
 ### Background
-In a standard production environment, a server exposed to the internet can face thousands of unauthorized SSH connection attempts per hour. Manual monitoring of /var/log/auth.log is impossible for a human operator, and leaving these attempts unmitigated risks a successful brute-force compromise.
+In a standard production environment, a server exposed to the internet can face thousands of unauthorized SSH connection attempts per hour. Manual monitoring of `/var/log/auth.log` is impossible for a human operator, and leaving these attempts unmitigated risks a successful brute-force compromise.
 
 ### The Problem
 The administration team needed an automated "Blue Team" utility to:
@@ -26,7 +26,7 @@ The administration team needed an automated "Blue Team" utility to:
 3. Audit and Execute defensive actions (Firewall blocking) without manual intervention.
 
 ### The Solution
-The `ssh_guard.sh` script implements a modular security pipeline. It extracts "Failed" and "Invalid" login attempts into a persisten failure log for analysis, uses `awk` to aggregate hit counts by IP address, and compares those counts against a user-defined threshold. By separating the Analysis Engine from the Setup Configuration, the script can be deployed across various Linux environments with zero code modification.
+The `ssh_guard.sh` script implements a modular security pipeline. It extracts "Failed" and "Invalid" login attempts into a persistent failure log for analysis, uses `awk` to aggregate hit counts by IP address, and compares those counts against a user-defined threshold. By separating the Analysis Engine from the Setup Configuration, the script can be deployed across various Linux environments with zero code modification.
 
 ## 🛠️ Technical Stack
 * **Language:** Bash (Shell Scripting)
@@ -48,7 +48,7 @@ The `ssh_guard.sh` script implements a modular security pipeline. It extracts "F
 
 ### Prerequisites
 
-A Linux environment (Bash shell) with standard utilities (`grep`, `awk`, `sort`, `uniq` `tee`).
+A Linux environment (Bash shell) with standard utilities (`grep`, `awk`, `sort`, `uniq`, `tee`).
 
 ### 1\. Script Execution
 
