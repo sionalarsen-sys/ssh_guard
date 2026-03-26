@@ -1,0 +1,17 @@
+Mar 26 02:46:18 server-1 sshd[5244]: Failed password for root from 10.10.5.122 port 19727 ssh2
+Mar 26 02:46:19 server-1 sshd[16706]: Failed password for root from 172.16.0.45 port 28288 ssh2
+Mar 26 02:46:20 server-1 sshd[25846]: Failed password for root from 172.16.0.45 port 11191 ssh2
+Mar 26 02:46:21 server-1 sshd[2544]: Failed password for root from 172.16.0.45 port 14383 ssh2
+Mar 26 02:46:22 server-1 sshd[20267]: Failed password for root from 10.10.5.122 port 6311 ssh2
+Mar 26 02:46:24 server-1 sshd[7914]: Failed password for root from 10.10.5.122 port 9 ssh2
+Mar 26 02:46:25 server-1 sshd[25699]: Failed password for root from 192.168.1.10 port 31111 ssh2
+Mar 26 02:46:26 server-1 sshd[9043]: Failed password for root from 10.10.5.122 port 31404 ssh2
+Mar 26 02:46:28 server-1 sshd[7180]: Failed password for root from 192.168.10.201 port 30335 ssh2
+Mar 26 02:46:29 server-1 sshd[20776]: Failed password for root from 172.16.0.45 port 23123 ssh2
+Mar 26 02:46:31 server-1 sshd[8577]: Failed password for root from 172.31.255.14 port 13617 ssh2
+Mar 26 02:46:32 server-1 sshd[4035]: Failed password for root from 192.168.1.10 port 31088 ssh2
+Mar 26 02:46:33 server-1 sshd[2820]: Failed password for root from 172.16.0.45 port 6769 ssh2
+Mar 26 02:46:34 server-1 sshd[23083]: Failed password for root from 172.16.0.45 port 25503 ssh2
+Mar 26 02:46:35 server-1 sshd[14776]: Failed password for root from 172.16.0.45 port 17369 ssh2
+Mar 26 02:46:36 server-1 sshd[8445]: Failed password for root from 192.168.1.10 port 247 ssh2
+Mar 26 02:46:38 server-1 sshd[4530]: Failed password for root from 10.10.5.122 port 10112 ssh2
