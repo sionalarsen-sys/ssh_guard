@@ -1,4 +1,0 @@
-[2026-03-26 03:39:17] Beginning SSH Guard Scan...
-[2026-03-26 03:39:17] ACTION: Blocking 172.16.0.45 (5 failures detected) 🚫
-[2026-03-26 03:39:17] ACTION: Blocking 192.168.10.201 (7 failures detected) 🚫
-[2026-03-26 03:39:17] --- Scan Complete ---

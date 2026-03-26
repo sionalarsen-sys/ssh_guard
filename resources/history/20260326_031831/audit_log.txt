@@ -1,7 +1,0 @@
-[2026-03-26 03:17:29] Beginning SSH Guard Scan...
-[2026-03-26 03:17:29] ACTION: Blocking 10.10.5.122 (6 failures detected)
-[2026-03-26 03:17:29] --- Scan Complete ---
-[2026-03-26 03:18:22] Beginning SSH Guard Scan...
-[2026-03-26 03:18:22] ACTION: Blocking 172.16.0.45 (6 failures detected)
-[2026-03-26 03:18:22] NOTICE: 192.168.1.10 is whitelisted. Skipping.
-[2026-03-26 03:18:22] --- Scan Complete ---

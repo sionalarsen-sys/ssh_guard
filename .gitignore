@@ -43,7 +43,7 @@ ssh_guard.conf
 *.txt
 *.log
 *.bak
-resources/
+!resources/
 
 # Don't ignore scripts and sample logs
 !ssh_guard.sh

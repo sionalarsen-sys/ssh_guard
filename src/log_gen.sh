@@ -58,6 +58,10 @@ fi
 IP=("192.168.1.20" "192.168.1.10" "172.16.0.45" "10.10.5.122" "192.168.10.201" "172.31.255.14")
 ATTACKERS=("10.10.5.122" "172.16.0.45")
 
+# Pick one random attacker to be the "Primary Target" for this specific test run
+TARGET_INDEX=$(( RANDOM % ${#ATTACKERS[@]} ))
+TARGET_IP=${ATTACKERS[$TARGET_INDEX]}
+
 #2. Startup
 #Startup message to show parameters of what will be created and to prevent user from believing the system frozen
 echo "Generating 20 log entries. This will take 2 seconds..."
@@ -76,8 +80,7 @@ for i in {1..20}; do
 
 	#Override: Ensure test coverage by forcing attackers in early rounds
 	if [[ "$i" -le 5 ]]; then
-    	INDEX=$(( RANDOM % 2 ))
-    	ADDRESS=${ATTACKERS[$INDEX]}
+    	ADDRESS=$TARGET_IP
 	fi
 
 	#Authorization check: Differentiate between admin and unauthorized attempts
