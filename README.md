@@ -12,20 +12,20 @@ This project was developed as a final portfolio piece for **IT 135 (Introduction
 * **Audit Logging:** Maintains a forensic trail of all identified threats and actions taken.
 * **Interactive Setup:** Includes a first-time configuration wizard for easy deployment.
 
-🔍 Case Study: The Problem & The Solution
-Background
+## 🔍 Case Study: The Problem & The Solution
+### Background
 In a standard production environment, a server exposed to the internet can face thousands of unauthorized SSH connection attempts per hour. Manual monitoring of /var/log/auth.log is impossible for a human operator, and leaving these attempts unmitigated risks a successful brute-force compromise.
 
-The Problem
+### The Problem
 The administration team needed an automated "Blue Team" utility to:
 
-Identify high-frequency failure patterns across massive log files.
+1. Identify high-frequency failure patterns across massive log files.
 
-Filter out legitimate administrative traffic (Whitelisting).
+2. Filter out legitimate administrative traffic (Whitelisting).
 
-Audit and Execute defensive actions (Firewall blocking) without manual intervention.
+3. Audit and Execute defensive actions (Firewall blocking) without manual intervention.
 
-The Solution
+### The Solution
 The ssh_guard.sh script implements a modular security pipeline. It extracts "Failed" and "Invalid" login attempts into a high-speed buffer, uses awk to aggregate hit counts by IP address, and compares those counts against a user-defined threshold. By separating the Analysis Engine from the Setup Configuration, the script can be deployed across various Linux environments with zero code modification.
 
 ## 🛠️ Technical Stack
@@ -45,41 +45,21 @@ The ssh_guard.sh script implements a modular security pipeline. It extracts "Fai
 3. **Run the Generator:** `bash src/log_gen.sh` (Creates 20 simulated failed logins).
 4. **Run SSH Guard:** `bash src/ssh_guard.sh`
 
-Gemini said
-That is a great structural model to follow. It moves the README from just being a "list of features" to a "professional case study," which is exactly what catches the eye of a hiring manager.
+## ⚙️ Usage
 
-Here is a version of that section tailored specifically to your SSH Guard project. You can paste this directly into your README.md (I've updated the logic to reflect your specific "Blue Team" approach):
+### Prerequisites
 
-🔍 Case Study: The Problem & The Solution
-Background
-In a standard production environment, a server exposed to the internet can face thousands of unauthorized SSH connection attempts per hour. Manual monitoring of /var/log/auth.log is impossible for a human operator, and leaving these attempts unmitigated risks a successful brute-force compromise.
+A Linux environment (Bash shell) with standard utilities (`sed`, `sort`, `tee`).
 
-The Problem
-The administration team needed an automated "Blue Team" utility to:
+### 1\. Script Execution
 
-Identify high-frequency failure patterns across massive log files.
-
-Filter out legitimate administrative traffic (Whitelisting).
-
-Audit and Execute defensive actions (Firewall blocking) without manual intervention.
-
-The Solution
-The ssh_guard.sh script implements a modular security pipeline. It extracts "Failed" and "Invalid" login attempts into a high-speed buffer, uses awk to aggregate hit counts by IP address, and compares those counts against a user-defined threshold. By separating the Analysis Engine from the Setup Configuration, the script can be deployed across various Linux environments with zero code modification.
-
-⚙️ Usage
-Prerequisites
-A Linux environment (Bash shell).
-
-Standard utilities: grep, awk, sort, uniq.
-
-(Optional) nftables for active blocking.
-
-1. Script Execution
 First, ensure your scripts are executable, then run the guard:
 
-Bash
+```bash
 chmod +x src/*.sh
 ./src/ssh_guard.sh
+```
+
 2. The Core Command Pipeline (For reference)
 The script utilizes a piped sequence to transform raw log data into actionable security intelligence:
 
@@ -87,22 +67,26 @@ Bash
 # 1. Isolate IP addresses from failure logs
 # 2. Sort and count unique occurrences
 # 3. Pass data to the decision-making loop
+
+```bash
 awk '{print $11}' "$FAIL" | sort | uniq -c | while read COUNT IP; do
     if [[ "$COUNT" -ge "$THRESHOLD" ]]; then
         # Check against Whitelist and Audit Log before acting
         grep -q "$IP" "$WHITELIST" || log_msg "ACTION: Blocking $IP"
     fi
 done
+```
+
 The use of uniq -c provides an immediate tally of attempts per IP, allowing for precise threshold enforcement.
 
 3. Reviewing Audit Logs
 The resulting audit_log.txt provides a forensic timeline of actions taken, ensuring the security team has a clear record of blocked threats:
 
-Plaintext
+```text
 [2026-03-25 14:10:01] ACTION: Blocking 172.16.0.45 (12 failures detected)
 [2026-03-25 14:10:05] NOTICE: 192.168.1.20 is whitelisted. Skipping.
 [2026-03-25 14:12:30] ACTION: Blocking 10.10.5.122 (8 failures detected)
-
+```
 ## 🤝 Attribution and Professional Disclosure
 
 ### Base Repository/Code Reference
