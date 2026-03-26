@@ -26,7 +26,7 @@ The administration team needed an automated "Blue Team" utility to:
 3. Audit and Execute defensive actions (Firewall blocking) without manual intervention.
 
 ### The Solution
-The ssh_guard.sh script implements a modular security pipeline. It extracts "Failed" and "Invalid" login attempts into a high-speed buffer, uses awk to aggregate hit counts by IP address, and compares those counts against a user-defined threshold. By separating the Analysis Engine from the Setup Configuration, the script can be deployed across various Linux environments with zero code modification.
+The `ssh_guard.sh` script implements a modular security pipeline. It extracts "Failed" and "Invalid" login attempts into a persisten failure log for analysis, uses `awk` to aggregate hit counts by IP address, and compares those counts against a user-defined threshold. By separating the Analysis Engine from the Setup Configuration, the script can be deployed across various Linux environments with zero code modification.
 
 ## 🛠️ Technical Stack
 * **Language:** Bash (Shell Scripting)
@@ -34,9 +34,8 @@ The ssh_guard.sh script implements a modular security pipeline. It extracts "Fai
 * **Environment:** Developed and tested in GitHub Codespaces (Ubuntu Linux)
 
 ## 📂 Project Structure
-* `/src`: Contains the core `ssh_guard.sh` logic.
+* `/src`: Contains the core `ssh_guard.sh` logic and `log_gen.sh`, a custom testing utility to simulate SSH attacks.
 * `/resources`: Directory for log processing (contains `.gitkeep`).
-* `log_gen.sh`: A custom testing utility to simulate SSH attacks.
 * `ssh_guard.conf`: Local configuration (user-defined).
 
 ## 🚦 Getting Started
@@ -49,7 +48,7 @@ The ssh_guard.sh script implements a modular security pipeline. It extracts "Fai
 
 ### Prerequisites
 
-A Linux environment (Bash shell) with standard utilities (`sed`, `sort`, `tee`).
+A Linux environment (Bash shell) with standard utilities (`grep`, `awk`, `sort`, `uniq` `tee`).
 
 ### 1\. Script Execution
 
@@ -60,15 +59,14 @@ chmod +x src/*.sh
 ./src/ssh_guard.sh
 ```
 
-2. The Core Command Pipeline (For reference)
+### 2\. The Core Command Pipeline (For reference)
 The script utilizes a piped sequence to transform raw log data into actionable security intelligence:
 
-Bash
+```bash
 # 1. Isolate IP addresses from failure logs
 # 2. Sort and count unique occurrences
 # 3. Pass data to the decision-making loop
 
-```bash
 awk '{print $11}' "$FAIL" | sort | uniq -c | while read COUNT IP; do
     if [[ "$COUNT" -ge "$THRESHOLD" ]]; then
         # Check against Whitelist and Audit Log before acting
@@ -77,16 +75,25 @@ awk '{print $11}' "$FAIL" | sort | uniq -c | while read COUNT IP; do
 done
 ```
 
-The use of uniq -c provides an immediate tally of attempts per IP, allowing for precise threshold enforcement.
+The use of `uniq -c` provides an immediate tally of attempts per IP, allowing for precise threshold enforcement.
 
-3. Reviewing Audit Logs
-The resulting audit_log.txt provides a forensic timeline of actions taken, ensuring the security team has a clear record of blocked threats:
+### 3\. Reviewing Audit Logs
+The resulting `audit_log.txt` provides a forensic timeline of actions taken, ensuring the security team has a clear record of blocked threats:
 
 ```text
 [2026-03-25 14:10:01] ACTION: Blocking 172.16.0.45 (12 failures detected)
 [2026-03-25 14:10:05] NOTICE: 192.168.1.20 is whitelisted. Skipping.
 [2026-03-25 14:12:30] ACTION: Blocking 10.10.5.122 (8 failures detected)
 ```
+## 🗺️ Roadmap & Future Enhancements
+
+While the core analysis engine is functional, the following features are planned for future releases to improve system hygiene and performance:
+
+* **Log Rotation & Cleanup:** Implementing a "Cleanup" routine to compress or archive `master_fail_log.txt` after processing to prevent disk space exhaustion.
+* **Active Firewall Integration:** Transitioning from "Logging-only" mode to active mitigation using `nftables` or `iptables` API calls.
+* **Discord/Slack Webhooks:** Adding real-time notifications to alert administrators when a high-priority block occurs.
+* **Config Validation:** Adding a pre-flight check to ensure the user-provided paths in `ssh_guard.conf` have the correct read/write permissions.
+
 ## 🤝 Attribution and Professional Disclosure
 
 ### Base Repository/Code Reference
