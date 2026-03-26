@@ -40,7 +40,7 @@ The `ssh_guard.sh` script implements a modular security pipeline. It extracts "F
 
 ## 🚦 Getting Started
 1. **Clone the repo:** `git clone <your-repo-link>`
-2. **Set Permissions:** `chmod +x src/*.sh`
+2. **Set Permissions:** `chmod ug+x src/*.sh`
 3. **Run the Generator:** `bash src/log_gen.sh` (Creates 20 simulated failed logins).
 4. **Run SSH Guard:** `bash src/ssh_guard.sh`
 
@@ -55,7 +55,7 @@ A Linux environment (Bash shell) with standard utilities (`grep`, `awk`, `sort`,
 First, ensure your scripts are executable, then run the guard:
 
 ```bash
-chmod +x src/*.sh
+chmod ug+x src/*.sh
 ./src/ssh_guard.sh
 ```
 
