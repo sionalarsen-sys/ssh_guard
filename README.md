@@ -116,5 +116,5 @@ No copyrighted code was used, and the final script logic was engineered and test
 ## 👤 Author
 
 * **Siona Larsen**
-* **[linkedin link]
+* **https://www.linkedin.com/in/sionalarsen/
 * **Educational Context:** Created for IT 135, North Seattle College.
